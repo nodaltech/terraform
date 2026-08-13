@@ -1,0 +1,29 @@
+aws_region = "us-east-1"
+
+# Existing VPC to scan for subnets and ENIs
+vpc_id = "vpc-0123456789abcdef0"
+
+# Path on the machine running Terraform to the Nodal probe installer zip.
+# Any local filename is fine; it is copied to the instance as /home/ubuntu/probe.zip.
+probe_installer_path = "./probe.zip"
+
+# Public subnet (route 0.0.0.0/0 to an Internet Gateway) so the probe gets an
+# auto-assigned public IPv4 address. Strongly recommended — do not leave null
+# unless the first subnet Terraform finds is already public.
+# Provide the ID of the public subnet within the VPC provided above
+probe_subnet_id = "subnet-0123456789abcdef0"
+
+# CIDRs allowed to SSH to the probe. Prefer your operator public IP as /32.
+allowed_ssh_cidrs = ["0.0.0.0/0"]
+
+# Optional: restrict which ENIs are mirrored, by default all in the VPC are mirrored
+# subnet_ids      = ["subnet-aaa", "subnet-bbb"]
+# source_eni_ids  = ["eni-aaa", "eni-bbb"]
+# exclude_eni_ids = ["eni-skip-me"]
+
+instance_type    = "t3.large"
+root_volume_size = 50
+
+tags = {
+  Environment = "prod"
+}

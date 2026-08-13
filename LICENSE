@@ -1,0 +1,4 @@
+Copyright (c) Nodal Technologies. All rights reserved.
+
+This Terraform configuration and module are provided to Nodal customers for
+deploying the Nodal Probe in their AWS accounts.
