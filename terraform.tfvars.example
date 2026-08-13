@@ -4,7 +4,7 @@ aws_region = "us-east-1"
 vpc_id = "vpc-0123456789abcdef0"
 
 # Local path to the probe installer zip (copied to the instance as probe.zip)
-probe_installer_path = "./probe.zip"
+probe_installer_path = "probe.zip"
 
 # Public subnet (route 0.0.0.0/0 to an Internet Gateway)
 probe_subnet_id = "subnet-0123456789abcdef0"
