@@ -3,11 +3,6 @@ output "instance_id" {
   value       = aws_instance.probe.id
 }
 
-output "instance_name" {
-  description = "Name tag of the probe instance."
-  value       = "Nodal Probe"
-}
-
 output "public_ip" {
   description = "Auto-assigned public IP of ens5 (not an Elastic IP). Sniff NIC has no public IP."
   value       = local.probe_public_ip

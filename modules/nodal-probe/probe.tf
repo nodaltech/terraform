@@ -52,17 +52,22 @@ resource "aws_ec2_tag" "primary_eni_name" {
   value       = "Nodal Probe Primary"
 }
 
-resource "aws_ec2_tag" "primary_eni_component" {
-  resource_id = aws_instance.probe.primary_network_interface_id
-  key         = "Component"
-  value       = "nodal-probe"
-}
+# Attach sniff as ens6 (device index 1) on create only.
+# aws_network_interface_attachment hangs on destroy because Terraform detaches
+# while the instance is still running (and the ENI was a mirror target). We
+# Do not detach here; instance termination releases the ENI.
+resource "terraform_data" "sniff_attach" {
+  triggers_replace = [
+    aws_instance.probe.id,
+    aws_network_interface.sniff.id,
+  ]
 
-# Device index 1 -> ens6 on Ubuntu. Attach after the instance exists; user_data
-# and the install script bring ens6 up. Destroy traffic mirror sessions/target
-# before this resource (see mirroring.tf depends_on) or detach can hang.
-resource "aws_network_interface_attachment" "sniff" {
-  instance_id          = aws_instance.probe.id
-  network_interface_id = aws_network_interface.sniff.id
-  device_index         = 1
+  input = {
+    instance_id = aws_instance.probe.id
+    eni_id      = aws_network_interface.sniff.id
+  }
+
+  provisioner "local-exec" {
+    command = "aws ec2 attach-network-interface --network-interface-id ${aws_network_interface.sniff.id} --instance-id ${aws_instance.probe.id} --device-index 1 --region ${data.aws_region.current.name}"
+  }
 }

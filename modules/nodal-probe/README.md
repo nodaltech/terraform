@@ -1,20 +1,17 @@
 # Nodal Probe module
 
-Reusable Terraform module that deploys a Nodal Probe into an existing AWS VPC, configures VPC Traffic Mirroring to its sniff NIC, and installs a locally provided probe zip over SSH.
+Terraform module that places a Nodal Probe in an existing VPC, sets up Traffic Mirroring to its sniff NIC (`ens6`), and installs a local probe zip over SSH.
 
-## Usage
+## Example
 
 ```hcl
 module "nodal_probe" {
-  source = "../../modules/nodal-probe" # or a git source with //modules/nodal-probe
+  source = "./modules/nodal-probe"
 
-  vpc_id               = var.vpc_id
-  probe_installer_path = abspath(var.probe_installer_path)
-  probe_subnet_id      = var.probe_subnet_id # public subnet
+  vpc_id               = "vpc-0123456789abcdef0"
+  probe_subnet_id      = "subnet-0123456789abcdef0"
+  probe_installer_path = abspath("./probe.zip")
   allowed_ssh_cidrs    = ["203.0.113.10/32"]
-  tags = {
-    Environment = "prod"
-  }
 }
 ```
 
@@ -27,25 +24,12 @@ module "nodal_probe" {
 | tls | >= 4.0, < 5.0 |
 | local | >= 2.4, < 3.0 |
 
-## Providers
-
-The AWS provider must be configured by the root module (region and credentials).
-
-## Resources (summary)
-
-- EC2 instance (Ubuntu 24.04), key pair, security groups
-- Secondary ENI + attachment (sniff / mirror target)
-- Traffic Mirror target, filter, filter rules, sessions
-- IAM role + instance profile (SSM)
-- Local `nodal_probe.pem` private key file
-- `terraform_data` provisioners to upload and install the zip
+The root module must configure the AWS provider. The machine running Terraform also needs the **AWS CLI** (used to attach the sniff ENI).
 
 ## Notes
 
-- Prefer a dedicated **public** subnet via `probe_subnet_id`.
-- Restrict `allowed_ssh_cidrs` in production.
-- The private key material is stored in Terraform state — use encrypted remote state.
-- Destroy with Terraform only; do not terminate the instance solely in the AWS console.
-- Installer zip must include `update/install.sh` (nested paths allowed).
+- Use a public subnet for `probe_subnet_id`
+- Installer zip must include `update/install.sh`
+- Destroy with Terraform only
 
-See the [repository README](../../README.md) for full customer documentation.
+See the [root README](../../README.md) for full usage.

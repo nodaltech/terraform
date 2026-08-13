@@ -3,10 +3,9 @@ resource "aws_ec2_traffic_mirror_target" "probe" {
   network_interface_id = aws_network_interface.sniff.id
   tags                 = merge(local.tags, { Name = "Nodal Probe" })
 
-  # Create after attach; destroy before detach (avoids ENI detach hangs).
   depends_on = [
     aws_instance.probe,
-    aws_network_interface_attachment.sniff,
+    terraform_data.sniff_attach,
   ]
 }
 

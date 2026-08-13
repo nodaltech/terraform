@@ -1,4 +1,4 @@
-# Local secrets and Terraform working files — never commit these.
+# Local secrets and Terraform working files. Never commit these.
 .terraform/
 .terraform.lock.hcl.bak
 *.tfstate

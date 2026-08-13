@@ -16,7 +16,7 @@ variable "probe_installer_path" {
 variable "probe_subnet_id" {
   type        = string
   default     = null
-  description = "Subnet for the Nodal Probe (both NICs). Must be public (IGW route + MapPublicIpOnLaunch or Terraform associate_public_ip_address) so ens5 gets an auto-assigned public IP — not an Elastic IP. If null, the first subnet in the VPC is used."
+  description = "Subnet for the Nodal Probe (both NICs). Must be public (IGW route) so ens5 gets an auto-assigned public IP, not an Elastic IP. If null, the first subnet in the VPC is used."
 
   validation {
     condition     = var.probe_subnet_id == null || can(regex("^subnet-[0-9a-f]+$", var.probe_subnet_id))

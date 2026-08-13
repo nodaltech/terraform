@@ -34,7 +34,7 @@ resource "terraform_data" "probe_install" {
 
   depends_on = [
     aws_instance.probe,
-    aws_network_interface_attachment.sniff,
+    terraform_data.sniff_attach,
     local_sensitive_file.probe_pem,
   ]
 }
