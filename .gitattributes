@@ -1,0 +1,2 @@
+# Shell scripts run on Linux (remote-exec / user_data). Always use LF on checkout.
+*.sh text eol=lf
