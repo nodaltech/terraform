@@ -38,3 +38,5 @@ sudo ./install.sh
 
 echo "Probe install finished. Files under /home/ubuntu:"
 ls -la /home/ubuntu
+
+rm -f /home/ubuntu/probe.zip

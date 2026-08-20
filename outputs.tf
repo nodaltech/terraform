@@ -4,7 +4,7 @@ output "instance_id" {
 }
 
 output "public_ip" {
-  description = "Auto-assigned public IP of ens5 (not an Elastic IP)."
+  description = "Auto-assigned public IPv4 of the primary NIC, if enabled. Empty for typical private-subnet deployments."
   value       = module.nodal_probe.public_ip
 }
 
@@ -18,23 +18,18 @@ output "sniff_private_ip" {
   value       = module.nodal_probe.sniff_private_ip
 }
 
-output "ssh_command" {
-  description = "SSH command using the generated nodal_probe.pem key."
-  value       = module.nodal_probe.ssh_command
+output "ssm_start_session_command" {
+  description = "AWS CLI command to open an SSM Session Manager shell on the probe."
+  value       = module.nodal_probe.ssm_start_session_command
 }
 
-output "private_key_path" {
-  description = "Local path to nodal_probe.pem."
-  value       = module.nodal_probe.private_key_path
-}
-
-output "subnet_ids" {
-  description = "All subnet IDs discovered in the target VPC."
-  value       = module.nodal_probe.subnet_ids
+output "installer_s3_uri" {
+  description = "Private s3:// URI of the staged probe.zip."
+  value       = module.nodal_probe.installer_s3_uri
 }
 
 output "discovered_eni_ids" {
-  description = "In-use interface ENIs discovered in the VPC."
+  description = "Account-owned EC2 ENIs discovered as mirror candidates. Empty when source_eni_ids is set."
   value       = module.nodal_probe.discovered_eni_ids
 }
 

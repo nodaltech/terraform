@@ -1,0 +1,237 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Ec2ReadDiscover",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeVpcs",
+        "ec2:DescribeSubnets",
+        "ec2:DescribeNetworkInterfaces",
+        "ec2:DescribeSecurityGroups",
+        "ec2:DescribeSecurityGroupRules",
+        "ec2:DescribeInstances",
+        "ec2:DescribeInstanceStatus",
+        "ec2:DescribeInstanceAttribute",
+        "ec2:DescribeInstanceCreditSpecifications",
+        "ec2:DescribeInstanceTypes",
+        "ec2:DescribeImages",
+        "ec2:DescribeVolumes",
+        "ec2:DescribeTags",
+        "ec2:DescribeTrafficMirrorTargets",
+        "ec2:DescribeTrafficMirrorFilters",
+        "ec2:DescribeTrafficMirrorFilterRules",
+        "ec2:DescribeTrafficMirrorSessions",
+        "ec2:DescribeAvailabilityZones",
+        "ec2:DescribeAccountAttributes"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SsmPublicUbuntuAmiParameter",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:GetParameter",
+        "ssm:GetParameters"
+      ],
+      "Resource": "arn:aws:ssm:*:*:parameter/aws/service/canonical/ubuntu/server/24.04/*"
+    },
+    {
+      "Sid": "Ec2CreateProbeComputeAndNetwork",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:RunInstances",
+        "ec2:TerminateInstances",
+        "ec2:StopInstances",
+        "ec2:StartInstances",
+        "ec2:ModifyInstanceAttribute",
+        "ec2:CreateNetworkInterface",
+        "ec2:DeleteNetworkInterface",
+        "ec2:AttachNetworkInterface",
+        "ec2:DetachNetworkInterface",
+        "ec2:ModifyNetworkInterfaceAttribute",
+        "ec2:AssignPrivateIpAddresses",
+        "ec2:UnassignPrivateIpAddresses",
+        "ec2:CreateSecurityGroup",
+        "ec2:DeleteSecurityGroup",
+        "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:AuthorizeSecurityGroupEgress",
+        "ec2:RevokeSecurityGroupIngress",
+        "ec2:RevokeSecurityGroupEgress",
+        "ec2:CreateTags",
+        "ec2:DeleteTags"
+      ],
+      "Resource": [
+        "arn:aws:ec2:REGION:ACCOUNT_ID:instance/*",
+        "arn:aws:ec2:REGION:ACCOUNT_ID:network-interface/*",
+        "arn:aws:ec2:REGION:ACCOUNT_ID:volume/*",
+        "arn:aws:ec2:REGION:ACCOUNT_ID:security-group/*",
+        "arn:aws:ec2:REGION:ACCOUNT_ID:subnet/*",
+        "arn:aws:ec2:REGION:ACCOUNT_ID:vpc/*",
+        "arn:aws:ec2:REGION:ACCOUNT_ID:key-pair/*",
+        "arn:aws:ec2:REGION::image/*"
+      ]
+    },
+    {
+      "Sid": "Ec2TrafficMirroring",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateTrafficMirrorTarget",
+        "ec2:DeleteTrafficMirrorTarget",
+        "ec2:CreateTrafficMirrorFilter",
+        "ec2:DeleteTrafficMirrorFilter",
+        "ec2:CreateTrafficMirrorFilterRule",
+        "ec2:DeleteTrafficMirrorFilterRule",
+        "ec2:ModifyTrafficMirrorFilterNetworkServices",
+        "ec2:CreateTrafficMirrorSession",
+        "ec2:DeleteTrafficMirrorSession",
+        "ec2:ModifyTrafficMirrorSession",
+        "ec2:CreateTags",
+        "ec2:DeleteTags"
+      ],
+      "Resource": [
+        "arn:aws:ec2:REGION:ACCOUNT_ID:traffic-mirror-target/*",
+        "arn:aws:ec2:REGION:ACCOUNT_ID:traffic-mirror-filter/*",
+        "arn:aws:ec2:REGION:ACCOUNT_ID:traffic-mirror-session/*",
+        "arn:aws:ec2:REGION:ACCOUNT_ID:network-interface/*"
+      ]
+    },
+    {
+      "Sid": "IamProbeRoleAndProfile",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:GetRole",
+        "iam:ListRolePolicies",
+        "iam:ListAttachedRolePolicies",
+        "iam:ListInstanceProfilesForRole",
+        "iam:UpdateAssumeRolePolicy",
+        "iam:TagRole",
+        "iam:UntagRole",
+        "iam:PutRolePolicy",
+        "iam:GetRolePolicy",
+        "iam:DeleteRolePolicy",
+        "iam:CreateInstanceProfile",
+        "iam:DeleteInstanceProfile",
+        "iam:GetInstanceProfile",
+        "iam:TagInstanceProfile",
+        "iam:UntagInstanceProfile",
+        "iam:AddRoleToInstanceProfile",
+        "iam:RemoveRoleFromInstanceProfile"
+      ],
+      "Resource": [
+        "arn:aws:iam::ACCOUNT_ID:role/nodal-probe-*",
+        "arn:aws:iam::ACCOUNT_ID:instance-profile/nodal-probe-*"
+      ]
+    },
+    {
+      "Sid": "IamAttachSsmManagedPolicy",
+      "Effect": "Allow",
+      "Action": [
+        "iam:AttachRolePolicy",
+        "iam:DetachRolePolicy"
+      ],
+      "Resource": "arn:aws:iam::ACCOUNT_ID:role/nodal-probe-*",
+      "Condition": {
+        "ArnEquals": {
+          "iam:PolicyARN": "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+        }
+      }
+    },
+    {
+      "Sid": "IamPassProbeRoleToEc2",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": [
+        "arn:aws:iam::ACCOUNT_ID:role/nodal-probe-*",
+        "arn:aws:iam::ACCOUNT_ID:instance-profile/nodal-probe-*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "iam:PassedToService": "ec2.amazonaws.com"
+        }
+      }
+    },
+    {
+      "Sid": "S3InstallerBucket",
+      "Effect": "Allow",
+      "Action": [
+        "s3:CreateBucket",
+        "s3:DeleteBucket",
+        "s3:ListBucket",
+        "s3:GetBucketLocation",
+        "s3:GetBucketPolicy",
+        "s3:PutBucketPolicy",
+        "s3:DeleteBucketPolicy",
+        "s3:GetBucketPublicAccessBlock",
+        "s3:PutBucketPublicAccessBlock",
+        "s3:GetBucketOwnershipControls",
+        "s3:PutBucketOwnershipControls",
+        "s3:GetEncryptionConfiguration",
+        "s3:PutEncryptionConfiguration",
+        "s3:GetBucketTagging",
+        "s3:PutBucketTagging",
+        "s3:GetBucketVersioning",
+        "s3:GetBucketAcl",
+        "s3:GetBucketCORS",
+        "s3:GetBucketWebsite",
+        "s3:GetAccelerateConfiguration",
+        "s3:GetBucketRequestPayment",
+        "s3:GetBucketLogging",
+        "s3:GetLifecycleConfiguration",
+        "s3:GetReplicationConfiguration",
+        "s3:GetBucketObjectLockConfiguration",
+        "s3:GetBucketIntelligentTieringConfiguration"
+      ],
+      "Resource": "arn:aws:s3:::nodal-probe-*"
+    },
+    {
+      "Sid": "S3InstallerObject",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject",
+        "s3:GetObjectTagging",
+        "s3:PutObjectTagging",
+        "s3:AbortMultipartUpload",
+        "s3:ListMultipartUploadParts"
+      ],
+      "Resource": "arn:aws:s3:::nodal-probe-*/*"
+    },
+    {
+      "Sid": "SsmInstallDocument",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:CreateDocument",
+        "ssm:DeleteDocument",
+        "ssm:GetDocument",
+        "ssm:DescribeDocument",
+        "ssm:DescribeDocumentPermission",
+        "ssm:UpdateDocument",
+        "ssm:UpdateDocumentDefaultVersion",
+        "ssm:AddTagsToResource",
+        "ssm:RemoveTagsFromResource",
+        "ssm:ListTagsForResource"
+      ],
+      "Resource": "arn:aws:ssm:REGION:ACCOUNT_ID:document/NodalProbeInstall-*"
+    },
+    {
+      "Sid": "SsmInstallAssociation",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:CreateAssociation",
+        "ssm:UpdateAssociation",
+        "ssm:DeleteAssociation",
+        "ssm:DescribeAssociation",
+        "ssm:DescribeAssociationExecutions",
+        "ssm:DescribeAssociationExecutionTargets",
+        "ssm:ListAssociations",
+        "ssm:ListDocuments",
+        "ssm:DescribeInstanceInformation"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

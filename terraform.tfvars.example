@@ -1,25 +1,35 @@
-aws_region = "us-east-1"
+aws_region = "us-west-2"
 
-# Existing VPC to scan for subnets and ENIs
-vpc_id = "vpc-0123456789abcdef0"
+vpc_id = "vpc-xxxxxxxx"
 
-# Local path to the probe installer zip (copied to the instance as probe.zip)
+# Subnet for both probe NICs. May be private. Must belong to vpc_id.
+# Needs NAT or SSM/S3 VPC endpoints, or set associate_public_ip_address = true
+# when the subnet only has an Internet Gateway route.
+probe_subnet_id = "subnet-xxxxxxxx"
+
+# Local path to the probe installer zip (staged to private S3, installed via SSM)
 probe_installer_path = "probe.zip"
 
-# Public subnet (route 0.0.0.0/0 to an Internet Gateway)
-probe_subnet_id = "subnet-0123456789abcdef0"
+# Required for production: pin the ENI(s) to mirror.
+source_eni_ids = [
+  "eni-xxxxxxxx"
+]
 
-# CIDRs allowed to SSH. Use your public IP as /32 in production.
-allowed_ssh_cidrs = ["203.0.113.10/32"]
-
-# Optional: limit which ENIs are mirrored (default = all eligible ENIs in the VPC)
+# Opt-in only: mirror all account-owned EC2 ENIs in the VPC (can affect unrelated workloads).
+# enable_eni_auto_discovery = true
 # subnet_ids      = ["subnet-aaa", "subnet-bbb"]
-# source_eni_ids  = ["eni-aaa", "eni-bbb"]
 # exclude_eni_ids = ["eni-skip-me"]
 
 instance_type    = "t3.xlarge"
 root_volume_size = 50
 
+associate_public_ip_address = false
+
+# Optional emergency SSH (not used for install). Default is no inbound SSH.
+# key_name          = "existing-operator-key"
+# allowed_ssh_cidrs = ["203.0.113.10/32"]
+
 tags = {
-  Environment = "lab"
+  Environment = "dev"
+  Owner       = "infrastructure"
 }

@@ -4,8 +4,8 @@ output "instance_id" {
 }
 
 output "public_ip" {
-  description = "Auto-assigned public IP of ens5 (not an Elastic IP). Sniff NIC has no public IP."
-  value       = local.probe_public_ip
+  description = "Auto-assigned public IPv4 of the primary NIC, if associate_public_ip_address is true. Empty for typical private-subnet deployments."
+  value       = aws_instance.probe.public_ip
 }
 
 output "private_ip" {
@@ -28,28 +28,33 @@ output "sniff_eni_id" {
   value       = aws_network_interface.sniff.id
 }
 
-output "private_key_path" {
-  description = "Local path to the generated SSH private key."
-  value       = local_sensitive_file.probe_pem.filename
+output "iam_role_name" {
+  description = "IAM role name assumed by the probe instance."
+  value       = aws_iam_role.probe.name
 }
 
-output "key_pair_name" {
-  description = "AWS key pair name."
-  value       = aws_key_pair.probe.key_name
+output "iam_instance_profile_name" {
+  description = "IAM instance profile name attached to the probe."
+  value       = aws_iam_instance_profile.probe.name
 }
 
-output "ssh_command" {
-  description = "SSH command for the probe (ens5 auto-assigned public IP)."
-  value       = "ssh -i ${local_sensitive_file.probe_pem.filename} -o StrictHostKeyChecking=accept-new ubuntu@${local.probe_public_ip}"
+output "installer_s3_uri" {
+  description = "Private s3:// URI of the staged probe.zip. Not a public URL."
+  value       = local.installer_s3_uri
 }
 
-output "subnet_ids" {
-  description = "All subnet IDs discovered in the target VPC."
-  value       = data.aws_subnets.vpc.ids
+output "ssm_association_id" {
+  description = "SSM State Manager association ID that installs the probe."
+  value       = aws_ssm_association.install.id
+}
+
+output "ssm_start_session_command" {
+  description = "AWS CLI command to open an SSM Session Manager shell on the probe."
+  value       = "aws ssm start-session --target ${aws_instance.probe.id} --region ${data.aws_region.current.region}"
 }
 
 output "discovered_eni_ids" {
-  description = "In-use interface ENIs discovered in the VPC before exclusions."
+  description = "Account-owned, in-use EC2 ENIs discovered as mirror candidates. Empty when source_eni_ids is set."
   value       = sort(tolist(local.discovered_eni_ids))
 }
 
@@ -75,10 +80,5 @@ output "traffic_mirror_session_ids" {
 
 output "probe_subnet_id" {
   description = "Subnet where the Nodal Probe was placed."
-  value       = local.probe_subnet_id
-}
-
-output "allowed_ssh_cidrs" {
-  description = "CIDR blocks allowed to SSH to the probe."
-  value       = var.allowed_ssh_cidrs
+  value       = data.aws_subnet.probe.id
 }

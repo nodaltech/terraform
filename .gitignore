@@ -12,12 +12,30 @@ override.tf.json
 *_override.tf.json
 .terraform.tfstate.lock.info
 
-# Customer-specific values and keys
-terraform.tfvars
+# Saved plans
+*.tfplan
+tfplan
+plan.out
+*.out
+
+# Customer-specific values and secrets
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+!*.tfvars.json.example
 *.auto.tfvars
 *.auto.tfvars.json
 *.pem
+*.key
+*.p12
+*.pfx
 *.zip
+.env
+.env.*
+!.env.example
+credentials
+credentials.json
+secrets/
 
 # OS / editor
 .DS_Store

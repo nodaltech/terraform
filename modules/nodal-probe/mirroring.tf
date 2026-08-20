@@ -3,10 +3,9 @@ resource "aws_ec2_traffic_mirror_target" "probe" {
   network_interface_id = aws_network_interface.sniff.id
   tags                 = merge(local.tags, { Name = "Nodal Probe" })
 
-  depends_on = [
-    aws_instance.probe,
-    terraform_data.sniff_attach,
-  ]
+  # Keep the target after the attachment on create, and destroy the target
+  # before detach. Detaching a live mirror-target ENI previously hung.
+  depends_on = [aws_network_interface_attachment.sniff]
 }
 
 resource "aws_ec2_traffic_mirror_filter" "all" {
@@ -43,4 +42,11 @@ resource "aws_ec2_traffic_mirror_session" "eni" {
   traffic_mirror_filter_id = aws_ec2_traffic_mirror_filter.all.id
   session_number           = var.session_number
   tags                     = merge(local.tags, { Name = "Nodal Probe ${each.value}" })
+
+  # Explicit ENI lookups must succeed (and satisfy postconditions) first.
+  # Source-selection preconditions must pass before sessions are created.
+  depends_on = [
+    data.aws_network_interface.explicit_sources,
+    terraform_data.source_selection,
+  ]
 }

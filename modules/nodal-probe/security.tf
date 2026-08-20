@@ -1,6 +1,6 @@
 resource "aws_security_group" "primary" {
   name_prefix = "nodal-probe-primary-"
-  description = "Nodal Probe primary NIC (SSH and outbound)"
+  description = "Nodal Probe primary NIC (SSM management; no inbound required)"
   vpc_id      = var.vpc_id
   tags        = merge(local.tags, { Name = "Nodal Probe Primary" })
 
@@ -13,7 +13,7 @@ resource "aws_vpc_security_group_ingress_rule" "ssh" {
   for_each = toset(var.allowed_ssh_cidrs)
 
   security_group_id = aws_security_group.primary.id
-  description       = "SSH"
+  description       = "Optional SSH (not used for Terraform provisioning)"
   ip_protocol       = "tcp"
   from_port         = 22
   to_port           = 22
@@ -21,11 +21,15 @@ resource "aws_vpc_security_group_ingress_rule" "ssh" {
   tags              = merge(local.tags, { Name = "Nodal Probe SSH" })
 }
 
-resource "aws_vpc_security_group_egress_rule" "primary_all" {
+resource "aws_vpc_security_group_egress_rule" "primary" {
+  for_each = local.probe_egress_rules
+
   security_group_id = aws_security_group.primary.id
-  description       = "All egress (apt, installer, probe phone-home)"
-  ip_protocol       = "-1"
-  cidr_ipv4         = "0.0.0.0/0"
+  description       = each.value.description
+  ip_protocol       = each.value.ip_protocol
+  from_port         = each.value.ip_protocol == "-1" ? null : each.value.from_port
+  to_port           = each.value.ip_protocol == "-1" ? null : each.value.to_port
+  cidr_ipv4         = each.value.cidr_ipv4
   tags              = merge(local.tags, { Name = "Nodal Probe Primary Egress" })
 }
 
@@ -50,12 +54,4 @@ resource "aws_vpc_security_group_ingress_rule" "vxlan" {
   to_port           = 4789
   cidr_ipv4         = each.value
   tags              = merge(local.tags, { Name = "Nodal Probe VXLAN" })
-}
-
-resource "aws_vpc_security_group_egress_rule" "sniff_all" {
-  security_group_id = aws_security_group.sniff.id
-  description       = "All egress"
-  ip_protocol       = "-1"
-  cidr_ipv4         = "0.0.0.0/0"
-  tags              = merge(local.tags, { Name = "Nodal Probe Sniff Egress" })
 }
